@@ -1,14 +1,11 @@
 import os
 import gradio as gr
 import torch
-# Removed matplotlib and plot_entropies imports
 
-# Assuming bytelatent library and its dependencies are installed
 from bytelatent.data.file_util import get_fs
-# from bytelatent.distributed import DistributedArgs, setup_torch_distributed # Not needed
 from bytelatent.generate_patcher import patcher_nocache
 from bytelatent.tokenizers.blt_tokenizer import BltTokenizer
-# Removed: from bytelatent.plotting.entropy_figure_via_matplot_lib import plot_entropies
+from bytelatent.plotting.entropy_figure_via_matplot_lib import plot_entropies
 from bytelatent.args import TrainArgs
 from download_blt_weights import main as ensure_present
 
@@ -71,14 +68,20 @@ def process_text(prompt: str, model_name: str = "blt-1b"):
         batch_patch_lengths, batch_scores, batch_tokens = results
         # Decode the first (and only) result in the batch
         decoded_chars_list = [tokenizer.decode(row_tokens.tolist()) for row_tokens in batch_tokens]
-        decoded_output = decoded_chars_list[0] if decoded_chars_list else "No characters decoded."
+        fig = None
+        if decoded_chars_list:
+            decoded_output = decoded_chars_list[0]
+            fig = plot_entropies(
+                batch_patch_lengths[0],
+                batch_scores[0],
+                decoded_output,
+                threshold=patcher.threshold
+            )
 
         print("Processing and decoding complete.")
         # --- End Processing ---
 
-
-        # Return the decoded text string
-        return decoded_output
+        return fig
 
     except FileNotFoundError as e:
         print(f"Error: {e}")
@@ -92,19 +95,44 @@ def process_text(prompt: str, model_name: str = "blt-1b"):
         return f"An unexpected error occurred: {e}" # Return error as text output
 
 
-# --- Gradio Interface Definition ---
 iface = gr.Interface(
     fn=process_text,
     inputs=gr.Textbox(
         label="Input Prompt",
         placeholder="Enter your text here..."
     ),
-    # Changed output to display the decoded text
-    outputs=gr.Text(label="Decoded Output"),
+    outputs=gr.Plot(label="Entropy Plot"),
     title="ByteLatent Text Processor",
     description="Enter text to process it with the ByteLatent model ('blt-1b' by default). The decoded output will be shown.",
     allow_flagging="never",
 )
+
+with gr.Blocks() as iface:
+    gr.Markdown("# ByteLatent Entropy Visualizer") # Title
+    gr.Markdown(
+        "Process any prompt (limited to 512 bytes) with the 100M entropy patcher model "
+        "and visualize the token entropies plot below.<br><br>" # Updated description
+        "NOTE: this implementation differs slightly by excluding local attention so we limit "
+        "the characters limit to 512 to avoid any deviation.",
+        line_breaks=True
+    )
+
+    with gr.Column():
+        prompt_input = gr.Textbox(
+            label="Input Prompt",
+            value="Daenerys Targaryen is in Game of Thrones, a fantasy epic by George R.R. Martin.",
+            placeholder="Daenerys Targaryen is in Game of Thrones, a fantasy epic by George R.R. Martin.",
+            max_length=512
+        )
+        submit_button = gr.Button("Generate Plot") # Add button
+        plot_output = gr.Plot(label="Entropy w Threshold") # Output component
+
+    # Define the action when the button is clicked
+    submit_button.click(
+        fn=process_text,
+        inputs=prompt_input,      # Input component(s)
+        outputs=plot_output       # Output component(s)
+    )
 
 # --- Launch the Gradio App ---
 if __name__ == "__main__":

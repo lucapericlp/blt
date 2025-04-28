@@ -1,6 +1,5 @@
 import os
 
-import torch
 import typer
 
 from bytelatent.data.file_util import get_fs

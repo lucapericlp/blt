@@ -59,9 +59,8 @@ def plot_entropies(patch_lengths: torch.Tensor, scores: torch.Tensor, chars: str
 
     # Adjust layout and display the plot
     plt.tight_layout()
-    output_filename = "token_score_plot.png"
-    fig.savefig(output_filename, dpi=300, bbox_inches='tight') # Save the figure
-    print(f"Plot saved to {os.path.abspath(output_filename)}") # Print confirmation with full path
+    return fig
+    #  output_filename = "token_score_plot.png"
+    #  fig.savefig(output_filename, dpi=300, bbox_inches='tight') # Save the figure
+    #  print(f"Plot saved to {os.path.abspath(output_filename)}") # Print confirmation with full path
 
-    # Close the plot figure to free memory (good practice)
-    plt.close(fig)
