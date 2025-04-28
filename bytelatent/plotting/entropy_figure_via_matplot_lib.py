@@ -35,7 +35,14 @@ def plot_entropies(patch_lengths: torch.Tensor, scores: torch.Tensor, chars: str
     for boundary in patch_boundaries[:-1]:
         ax.axvline(x=boundary, color='grey', linestyle='--', linewidth=1)
 
-    ax.axhline(y=threshold, color='red', linestyle='--', linewidth=1)
+    ax.axhline(y=threshold, color='red', linestyle='--', linewidth=1, )
+    ax.annotate(f'Entropy Threshold',
+        xy=(0.05, threshold),  # Position of the line
+        xytext=(0.05, threshold + 0.1),  # Text position
+        xycoords='axes fraction',  # Use axes coordinates (0-1)
+        textcoords='data',  # Use data coordinates for text
+        color='red'
+    )
 
     # Set x-axis ticks and labels
     ax.set_xticks(x_indices)
