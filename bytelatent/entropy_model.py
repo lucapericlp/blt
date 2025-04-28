@@ -27,8 +27,8 @@ def load_entropy_model(entropy_model_checkpoint_dir, state_dict_path, device="cp
             max_seqlen=model_params["max_seqlen"],
             ffn_dim_multiplier=model_params["ffn_dim_multiplier"],
             vocab_size=model_params["vocab_size"],
-            attn_bias_type="local_block_causal",
-            attn_impl="xformers",
+            attn_bias_type="causal",
+            attn_impl="sdpa",
             sliding_window=512,
         )
     )
