@@ -1,3 +1,16 @@
+---
+title: Blt Entropy Patcher
+emoji: ⚡
+colorFrom: green
+colorTo: red
+sdk: gradio
+sdk_version: 5.27.0
+python_version: 3.11.11
+app_file: app.py
+pinned: false
+license: cc-by-nc-4.0
+---
+
 # Byte Latent Transformer
 
 This repository contains code for our paper: "Byte Latent Transformer: Patches Scale Better Than Tokens"
